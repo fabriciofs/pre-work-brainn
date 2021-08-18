@@ -5,7 +5,11 @@ const john = {
   hobbies: ["Surf", "Design"],
 };
 
-const jane = { ...john, name: "Jane", hobbies: ["MuayThai", "Programming"] };
+const jane = {
+  ...john,
+  name: "Jane",
+  hobbies: [...john.hobbies, "MuayThai", "Programming"],
+};
 
 console.log("John:", john);
 console.log("Jane:", jane);
