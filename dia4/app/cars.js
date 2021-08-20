@@ -80,6 +80,27 @@ const addCar = async (car) => {
   }
 };
 
+const removeCar = async (plate) => {
+  console.log("remove", plate);
+  try {
+    const result = await fetch("http://localhost:3333/cars", {
+      method: "DELETE",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ plate }),
+    });
+    if (result.ok) {
+      mountDataTable();
+    } else {
+      const error = await result.json();
+      throw new Error(error.message);
+    }
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 const clearDataTable = () => {
   [...formCarTable.rows]
     .filter((_, index) => index > 0)
@@ -98,6 +119,15 @@ const mountDataTable = async () => {
         Object.entries(car).forEach((entry) => {
           tr.appendChild(elementsList[entry[0]].tdFunction(entry[1]));
         });
+        const td = document.createElement("td");
+        const button = document.createElement("button");
+        button.innerText = "Excluir";
+        button.addEventListener("click", (e) => {
+          e.preventDefault();
+          removeCar(car.plate);
+        });
+        td.appendChild(button);
+        tr.appendChild(td);
         formCarTable.appendChild(tr);
       });
     } else {
