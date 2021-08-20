@@ -81,7 +81,6 @@ const addCar = async (car) => {
 };
 
 const removeCar = async (plate) => {
-  console.log("remove", plate);
   try {
     const result = await fetch("http://localhost:3333/cars", {
       method: "DELETE",
