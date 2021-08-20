@@ -26,18 +26,66 @@ const createTDcolor = (value) => {
   return td;
 };
 
-const elementsCreateFunctions = {
-  image: createTDImage,
-  brandModel: createTDText,
-  year: createTDText,
-  plate: createTDText,
-  color: createTDcolor,
+const elementsList = {
+  image: { tdFunction: createTDImage, defaultValue: "" },
+  brandModel: { tdFunction: createTDText, defaultValue: "" },
+  year: { tdFunction: createTDText, defaultValue: 0 },
+  plate: { tdFunction: createTDText, defaultValue: "" },
+  color: { tdFunction: createTDcolor, defaultValue: "" },
+};
+
+formCar.addEventListener(
+  "submit",
+  async (e) => {
+    e.preventDefault();
+    const car = [...e.target.elements]
+      .filter((element) => element.nodeName === "INPUT")
+      .reduce((obj, element) => {
+        obj[element.id] = element.value;
+        return obj;
+      }, {});
+
+    try {
+      await addCar(car);
+      [...e.target.elements]
+        .filter((element) => element.nodeName === "INPUT")
+        .forEach((element) => {
+          element.value = elementsList[element.id].defaultValue;
+        });
+      mountDataTable();
+    } catch (error) {
+      alert(error.message);
+    }
+
+    [...e.target.elements][0].focus();
+  },
+  false
+);
+
+const addCar = async (car) => {
+  try {
+    const result = await fetch("http://localhost:3333/cars", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(car),
+    });
+    if (!result.ok) {
+      const error = await result.json();
+      throw new Error(error.message);
+    }
+  } catch (error) {
+    throw new Error(error.message);
+  }
 };
 
 const clearDataTable = () => {
   [...formCarTable.rows]
     .filter((_, index) => index > 0)
-    .forEach((_, index) => formCarTable.deleteRow(index + 1));
+    .forEach(() => {
+      formCarTable.deleteRow(1);
+    });
 };
 
 const mountDataTable = async () => {
@@ -48,7 +96,7 @@ const mountDataTable = async () => {
       cars.forEach((car) => {
         const tr = document.createElement("tr");
         Object.entries(car).forEach((entry) => {
-          tr.appendChild(elementsCreateFunctions[entry[0]](entry[1]));
+          tr.appendChild(elementsList[entry[0]].tdFunction(entry[1]));
         });
         formCarTable.appendChild(tr);
       });
